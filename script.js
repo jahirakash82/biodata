@@ -59,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeSecurity() {
-    // localStorage ক্লিয়ার করা
     localStorage.removeItem('biodata_auth');
     
     blockDevTools();
@@ -241,8 +240,7 @@ function updateAttemptsDisplay() {
 
 function togglePasswordVisibility() {
     const type = elements.passwordInput.type === 'password' ? 'text' : 'password';
-    elements.passwordInput.type = 'password';
-    
+    elements.passwordInput.type = type; // ঠিক করা হয়েছে
     const icon = elements.togglePassword.querySelector('i');
     icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
 }
@@ -277,7 +275,7 @@ async function loadData() {
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                processBiodata(results.data);
+                processBiodataData(results.data);
                 showLoading(false);
             },
             error: function(error) {
@@ -294,7 +292,7 @@ async function loadData() {
     }
 }
 
-function processBiodata(rawData) {
+function processBiodataData(rawData) {
     biodataList = rawData.map(row => ({
         name: cleanText(row['নাম']),
         image: cleanText(row['ছবি']),
@@ -316,15 +314,15 @@ function processBiodata(rawData) {
 
 function cleanText(text) {
     if (!text || text.toString().toLowerCase() === 'nan' || text.toString().trim() === '') {
-    return 'N/A';
+        return 'N/A';
     }
-    return text.toString();
+    return text.toString().trim();
 }
 
 function formatDate(dateString) {
     if (!dateString || dateString === 'N/A') return 'N/A';
     
-    const cleanedDate = dateString.replace(/[\.\/]/g, '\/');
+    const cleanedDate = dateString.replace(/[\.\/]/g, '-');
     const parts = cleanedDate.split('-');
     
     if (parts.length === 3) {
@@ -340,12 +338,11 @@ function formatDate(dateString) {
     }
     
     return 'N/A';
-
 }
 
 function processImageUrl(url) {
-    if (!url || url === '') {
-        return 'https://via.placeholder.com/300x400.png?textNo+Image';
+    if (!url || url === 'N/A') {
+        return 'https://via.placeholder.com/300x400.png?text=No+Image';
     }
     
     const driveMatch = url.match(/\/d\/([^\/]+)/) || url.match(/id=([^&]+)/);
@@ -567,6 +564,7 @@ function showBirthdayModal() {
 }
 
 function updateLastUpdated() {
+    const now = new Date();
     const timeString = now.toLocaleString('bn-BD', {
         year: 'numeric',
         month: 'short',
@@ -575,11 +573,10 @@ function updateLastUpdated() {
         minute: '2-digit'
     });
     elements.lastUpdated.textContent = timeString;
-
 }
 
 function refreshData() {
-    elements.refreshBtn.querySelector('i').style = 'spin 1s linear infinite';
+    elements.refreshBtn.querySelector('i').style.animation = 'spin 1s linear infinite';
     loadData().finally(() => {
         elements.refreshBtn.querySelector('i').style.animation = '';
     });

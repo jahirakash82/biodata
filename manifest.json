@@ -1,0 +1,27 @@
+{
+  "name": "বায়োডাটা ডিরেক্টরি",
+  "short_name": "বায়োডাটা",
+  "description": "নিরাপদ বায়োডাটা ডিরেক্টরি অ্যাপ্লিকেশন",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#667eea",
+  "theme_color": "#2c3e50",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://via.placeholder.com/192x192.png?text=🏛️",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://via.placeholder.com/512x512.png?text=🏛️",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "utilities"],
+  "lang": "bn",
+  "dir": "ltr"
+}

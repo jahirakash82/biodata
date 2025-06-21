@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="নিরাপদ বায়োডাটা ডিরেক্টরি">
+    <title>🏛️ বায়োডাটা ডিরেক্টরি</title>
+    <link href="https://fonts.maateen.me/kalpurush/font.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="https://via.placeholder.com/32x32.png?text=🏛️">
+</head>
+<body>
+    <!-- পাসওয়ার্ড প্রোটেকশন স্ক্রিন -->
+    <div id="passwordScreen" class="password-screen">
+        <div class="password-container">
+            <div class="password-header">
+                <div class="security-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h1>🏛️ বায়োডাটা সিস্টেম</h1>
+                <p>নিরাপত্তার জন্য পাসওয়ার্ড প্রয়োজন</p>
+            </div>
+            
+            <form id="passwordForm" class="password-form">
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="passwordInput" placeholder="পাসওয়ার্ড লিখুন..." required>
+                    <button type="button" id="togglePassword" class="toggle-btn">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                
+                <button type="submit" id="submitBtn" class="submit-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    প্রবেশ করুন
+                </button>
+                
+                <div id="errorMessage" class="error-message" style="display: none;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="errorText">ভুল পাসওয়ার্ড!</span>
+                </div>
+                
+                <div id="attemptsIndicator" class="attempts-indicator">
+                    <div class="attempts-dots">
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                        <span class="dot"></span>
+                    </div>
+                    <p>চেষ্টা: <span id="attemptCount">0</span>/3</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- মূল ওয়েবসাইট -->
+    <div id="mainContent" class="main-content" style="display: none;">
+        <!-- জন্মদিনের নোটিফিকেশন -->
+        <div id="birthdayNotification" class="birthday-notification">
+            <i class="fas fa-gift"></i>
+            <span>জন্মদিন</span>
+            <span id="birthdayCount" class="birthday-count">0</span>
+        </div>
+
+        <!-- হেডার -->
+        <header class="header">
+            <div class="container">
+                <h1 class="site-title">
+                    <i class="fas fa-university"></i>
+                    বায়োডাটা ডিরেক্টরি
+                </h1>
+                
+                <div class="header-controls">
+                    <div class="search-container">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="searchInput" placeholder="নাম দিয়ে খুঁজুন...">
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button id="refreshBtn" class="action-btn" title="তথ্য রিফ্রেশ করুন">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button id="addNewBtn" class="action-btn add-btn" title="নতুন তথ্য যোগ করুন">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- স্ট্যাটস বার -->
+        <div class="stats-bar">
+            <div class="container">
+                <div class="stats-left">
+                    <div class="stat-item">
+                        <i class="fas fa-users"></i>
+                        <span>মোট: <span id="totalCount">0</span></span>
+                    </div>
+                    
+                    <button id="birthdayBtn" class="birthday-btn">
+                        <i class="fas fa-birthday-cake"></i>
+                        <span>জন্মদিন</span>
+                        <span id="birthdayBadge" class="birthday-badge">0</span>
+                    </button>
+                </div>
+                
+                <div class="stats-right">
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span>আপডেট: <span id="lastUpdated">লোড হচ্ছে...</span></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- মূল কন্টেন্ট -->
+        <main class="main">
+            <div class="container">
+                <div id="loadingSpinner" class="loading-spinner">
+                    <div class="spinner"></div>
+                    <p>ডেটা লোড হচ্ছে...</p>
+                </div>
+                
+                <div id="gridContainer" class="grid-container"></div>
+                
+                <div id="noResults" class="no-results" style="display: none;">
+                    <i class="fas fa-search"></i>
+                    <h3>কোনো তথ্য পাওয়া যায়নি</h3>
+                    <p>অন্য কিছু দিয়ে খোঁজ করে দেখুন</p>
+                </div>
+                
+                <!-- পেজিনেশন -->
+                <div id="pagination" class="pagination" style="display: none;">
+                    <button id="prevPage" class="page-btn">
+                        <i class="fas fa-chevron-left"></i>
+                        পূর্ববর্তী
+                    </button>
+                    
+                    <span id="pageInfo" class="page-info">পৃষ্ঠা 1</span>
+                    
+                    <button id="nextPage" class="page-btn">
+                        পরবর্তী
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- বিস্তারিত মডাল -->
+    <div id="detailsModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>বিস্তারিত তথ্য</h2>
+                <button class="close-btn" id="closeDetailsModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="modalBody" class="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- জন্মদিনের মডাল -->
+    <div id="birthdayModal" class="modal birthday-modal">
+        <div class="modal-content">
+            <div class="modal-header birthday-header">
+                <h2>
+                    <i class="fas fa-birthday-cake"></i>
+                    আগামী ৭ দিনের জন্মদিন
+                </h2>
+                <button class="close-btn" id="closeBirthdayModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="birthdayModalBody" class="modal-body birthday-body"></div>
+        </div>
+    </div>
+
+    <!-- স্ক্রিপ্ট -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

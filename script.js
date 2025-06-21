@@ -1,4 +1,3 @@
-// নিরাপত্তা কনফিগারেশন
 const SECURITY_CONFIG = {
     password: "jahirulislamakash00100",
     maxAttempts: 3,
@@ -6,7 +5,6 @@ const SECURITY_CONFIG = {
     sessionDuration: 24 * 60 * 60 * 1000 // 24 ঘন্টা
 };
 
-// ডেটা কনফিগারেশন
 const DATA_CONFIG = {
     csvUrl: 'https://docs.google.com/spreadsheets/d/1r4wwNscRr_ynXBEwUI7z0mNk1thiBqXtrvDQMKJ3vrE/gviz/tq?tqx=out:csv&gid=1929296116',
     googleFormUrl: 'https://forms.gle/RM7uAESdi5Zm6uop6',
@@ -14,7 +12,6 @@ const DATA_CONFIG = {
     refreshInterval: 30000 // 30 সেকেন্ড
 };
 
-// গ্লোবাল ভেরিয়েবল
 let biodataList = [];
 let filteredData = [];
 let currentPage = 1;
@@ -22,7 +19,6 @@ let isAuthenticated = false;
 let failedAttempts = 0;
 let isBlocked = false;
 
-// DOM এলিমেন্ট
 const elements = {
     passwordScreen: document.getElementById('passwordScreen'),
     mainContent: document.getElementById('mainContent'),
@@ -56,24 +52,21 @@ const elements = {
     closeBirthdayModal: document.getElementById('closeBirthdayModal')
 };
 
-// ইনিশিয়ালাইজেশন
 document.addEventListener('DOMContentLoaded', function() {
     initializeSecurity();
     setupEventListeners();
     checkAuthentication();
 });
 
-// নিরাপত্তা ইনিশিয়ালাইজেশন
 function initializeSecurity() {
-    // ডেভেলপার টুলস ব্লক
+    // localStorage ক্লিয়ার করা
+    localStorage.removeItem('biodata_auth');
+    
     blockDevTools();
     
-    // রাইট ক্লিক ব্লক
     document.addEventListener('contextmenu', e => e.preventDefault());
     
-    // কীবোর্ড শর্টকাট ব্লক
     document.addEventListener('keydown', function(e) {
-        // F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U ব্লক
         if (e.key === 'F12' || 
             (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
             (e.ctrlKey && e.key === 'u')) {
@@ -83,7 +76,6 @@ function initializeSecurity() {
     });
 }
 
-// ডেভেলপার টুলস ব্লক
 function blockDevTools() {
     let devtools = {
         open: false,
@@ -97,7 +89,6 @@ function blockDevTools() {
             window.outerWidth - window.innerWidth > threshold) {
             if (!devtools.open) {
                 devtools.open = true;
-                // ডেভেলপার টুলস খোলা হলে পেজ রিডাইরেক্ট বা ব্লক
                 document.body.innerHTML = `
                     <div style="
                         position: fixed;
@@ -130,30 +121,23 @@ function blockDevTools() {
     }, 500);
 }
 
-// ইভেন্ট লিসেনার সেটআপ
 function setupEventListeners() {
-    // পাসওয়ার্ড ফর্ম
     elements.passwordForm.addEventListener('submit', handlePasswordSubmit);
     elements.togglePassword.addEventListener('click', togglePasswordVisibility);
     
-    // সার্চ
     elements.searchInput.addEventListener('input', handleSearch);
     
-    // বাটন
     elements.refreshBtn.addEventListener('click', refreshData);
     elements.addNewBtn.addEventListener('click', () => window.open(DATA_CONFIG.googleFormUrl, '_blank'));
     elements.birthdayBtn.addEventListener('click', showBirthdayModal);
     elements.birthdayNotification.addEventListener('click', showBirthdayModal);
     
-    // পেজিনেশন
     elements.prevPage.addEventListener('click', () => changePage(-1));
     elements.nextPage.addEventListener('click', () => changePage(1));
     
-    // মডাল
     elements.closeDetailsModal.addEventListener('click', () => hideModal('detailsModal'));
     elements.closeBirthdayModal.addEventListener('click', () => hideModal('birthdayModal'));
     
-    // মডাল বাইরে ক্লিক করলে বন্ধ
     elements.detailsModal.addEventListener('click', (e) => {
         if (e.target === elements.detailsModal) hideModal('detailsModal');
     });
@@ -162,24 +146,10 @@ function setupEventListeners() {
     });
 }
 
-// অথেনটিকেশন চেক
 function checkAuthentication() {
-    const authData = localStorage.getItem('biodata_auth');
-    if (authData) {
-        const { timestamp, authenticated } = JSON.parse(authData);
-        const timePassed = Date.now() - timestamp;
-        
-        if (authenticated && timePassed < SECURITY_CONFIG.sessionDuration) {
-            authenticateUser();
-            return;
-        }
-    }
-    
-    // ব্লক স্ট্যাটাস চেক
     checkBlockStatus();
 }
 
-// ব্লক স্ট্যাটাস চেক
 function checkBlockStatus() {
     const blockData = localStorage.getItem('biodata_block');
     if (blockData) {
@@ -197,7 +167,6 @@ function checkBlockStatus() {
     }
 }
 
-// পাসওয়ার্ড সাবমিট হ্যান্ডল
 function handlePasswordSubmit(e) {
     e.preventDefault();
     
@@ -209,15 +178,9 @@ function handlePasswordSubmit(e) {
     const password = elements.passwordInput.value.trim();
     
     if (password === SECURITY_CONFIG.password) {
-        // সফল লগইন
         authenticateUser();
-        localStorage.setItem('biodata_auth', JSON.stringify({
-            timestamp: Date.now(),
-            authenticated: true
-        }));
         localStorage.removeItem('biodata_block');
     } else {
-        // ভুল পাসওয়ার্ড
         failedAttempts++;
         updateAttemptsDisplay();
         
@@ -231,7 +194,6 @@ function handlePasswordSubmit(e) {
     }
 }
 
-// ইউজার অথেনটিকেট
 function authenticateUser() {
     isAuthenticated = true;
     elements.passwordScreen.style.display = 'none';
@@ -239,7 +201,6 @@ function authenticateUser() {
     loadData();
 }
 
-// ইউজার ব্লক
 function blockUser() {
     isBlocked = true;
     localStorage.setItem('biodata_block', JSON.stringify({
@@ -250,7 +211,6 @@ function blockUser() {
     showBlockMessage(SECURITY_CONFIG.blockDuration / 1000);
 }
 
-// ব্লক মেসেজ দেখান
 function showBlockMessage(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -267,7 +227,6 @@ function showBlockMessage(seconds) {
     }
 }
 
-// চেষ্টার সংখ্যা আপডেট
 function updateAttemptsDisplay() {
     elements.attemptCount.textContent = failedAttempts;
     const dots = document.querySelectorAll('.dot');
@@ -280,27 +239,23 @@ function updateAttemptsDisplay() {
     });
 }
 
-// পাসওয়ার্ড দৃশ্যমানতা টগল
 function togglePasswordVisibility() {
     const type = elements.passwordInput.type === 'password' ? 'text' : 'password';
-    elements.passwordInput.type = type;
+    elements.passwordInput.type = 'password';
     
     const icon = elements.togglePassword.querySelector('i');
     icon.className = type === 'password' ? 'fas fa-eye' : 'fas fa-eye-slash';
 }
 
-// এরর দেখান
 function showError(message) {
     elements.errorText.textContent = message;
     elements.errorMessage.style.display = 'flex';
 }
 
-// এরর লুকান
 function hideError() {
     elements.errorMessage.style.display = 'none';
 }
 
-// ডেটা লোড
 async function loadData() {
     try {
         showLoading(true);
@@ -322,7 +277,7 @@ async function loadData() {
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                processBiodataData(results.data);
+                processBiodata(results.data);
                 showLoading(false);
             },
             error: function(error) {
@@ -339,8 +294,7 @@ async function loadData() {
     }
 }
 
-// বায়োডাটা ডেটা প্রক্রিয়াকরণ
-function processBiodataData(rawData) {
+function processBiodata(rawData) {
     biodataList = rawData.map(row => ({
         name: cleanText(row['নাম']),
         image: cleanText(row['ছবি']),
@@ -360,19 +314,17 @@ function processBiodataData(rawData) {
     updateLastUpdated();
 }
 
-// টেক্সট পরিষ্কার
 function cleanText(text) {
     if (!text || text.toString().toLowerCase() === 'nan' || text.toString().trim() === '') {
-        return 'N/A';
+    return 'N/A';
     }
-    return text.toString().trim();
+    return text.toString();
 }
 
-// তারিখ ফরম্যাট
 function formatDate(dateString) {
     if (!dateString || dateString === 'N/A') return 'N/A';
     
-    const cleanedDate = dateString.replace(/[\.\/]/g, '-');
+    const cleanedDate = dateString.replace(/[\.\/]/g, '\/');
     const parts = cleanedDate.split('-');
     
     if (parts.length === 3) {
@@ -380,7 +332,6 @@ function formatDate(dateString) {
         let month = parts[1].padStart(2, '0');
         const year = parts[2];
         
-        // মাস ১২ এর বেশি হলে দিন এবং মাস অদলবদল
         if (parseInt(month) > 12) {
             [day, month] = [month, day];
         }
@@ -389,15 +340,14 @@ function formatDate(dateString) {
     }
     
     return 'N/A';
+
 }
 
-// ইমেজ URL প্রক্রিয়াকরণ
 function processImageUrl(url) {
-    if (!url || url === 'N/A') {
-        return 'https://via.placeholder.com/300x400.png?text=No+Image';
+    if (!url || url === '') {
+        return 'https://via.placeholder.com/300x400.png?textNo+Image';
     }
     
-    // Google Drive লিংক প্রক্রিয়াকরণ
     const driveMatch = url.match(/\/d\/([^\/]+)/) || url.match(/id=([^&]+)/);
     if (driveMatch) {
         return `https://drive.google.com/thumbnail?sz=w400&id=${driveMatch[1]}`;
@@ -406,14 +356,12 @@ function processImageUrl(url) {
     return url;
 }
 
-// ডিসপ্লে আপডেট
 function updateDisplay() {
     renderGrid();
     updateStats();
     updatePagination();
 }
 
-// গ্রিড রেন্ডার
 function renderGrid() {
     const startIndex = (currentPage - 1) * DATA_CONFIG.itemsPerPage;
     const endIndex = startIndex + DATA_CONFIG.itemsPerPage;
@@ -432,13 +380,11 @@ function renderGrid() {
     
     elements.gridContainer.innerHTML = pageData.map(person => createPersonCard(person)).join('');
     
-    // কার্ড ক্লিক ইভেন্ট
     elements.gridContainer.querySelectorAll('.person-card').forEach((card, index) => {
         card.addEventListener('click', () => showPersonDetails(pageData[index]));
     });
 }
 
-// ব্যক্তির কার্ড তৈরি
 function createPersonCard(person) {
     return `
         <div class="person-card">
@@ -471,7 +417,6 @@ function createPersonCard(person) {
     `;
 }
 
-// ব্যক্তির বিস্তারিত দেখান
 function showPersonDetails(person) {
     const detailsHtml = `
         <div class="person-details">
@@ -497,7 +442,6 @@ function showPersonDetails(person) {
     showModal('detailsModal');
 }
 
-// বিস্তারিত আইটেম তৈরি
 function createDetailItem(icon, color, label, value) {
     return `
         <div class="detail-item">
@@ -512,12 +456,10 @@ function createDetailItem(icon, color, label, value) {
     `;
 }
 
-// স্ট্যাটস আপডেট
 function updateStats() {
     elements.totalCount.textContent = filteredData.length;
 }
 
-// পেজিনেশন আপডেট
 function updatePagination() {
     const totalPages = Math.ceil(filteredData.length / DATA_CONFIG.itemsPerPage);
     
@@ -526,7 +468,6 @@ function updatePagination() {
     elements.nextPage.disabled = currentPage === totalPages;
 }
 
-// পেজ পরিবর্তন
 function changePage(direction) {
     const totalPages = Math.ceil(filteredData.length / DATA_CONFIG.itemsPerPage);
     const newPage = currentPage + direction;
@@ -538,7 +479,6 @@ function changePage(direction) {
     }
 }
 
-// সার্চ হ্যান্ডল
 function handleSearch(e) {
     const query = e.target.value.toLowerCase().trim();
     
@@ -560,7 +500,6 @@ function handleSearch(e) {
     updateDisplay();
 }
 
-// জন্মদিনের নোটিফিকেশন আপডেট
 function updateBirthdayNotification() {
     const upcomingBirthdays = getUpcomingBirthdays();
     const count = upcomingBirthdays.length;
@@ -575,7 +514,6 @@ function updateBirthdayNotification() {
     }
 }
 
-// আগামী জন্মদিন পান
 function getUpcomingBirthdays() {
     const today = new Date();
     const nextWeek = new Date(today);
@@ -595,7 +533,6 @@ function getUpcomingBirthdays() {
     });
 }
 
-// জন্মদিনের মডাল দেখান
 function showBirthdayModal() {
     const upcomingBirthdays = getUpcomingBirthdays();
     
@@ -629,9 +566,7 @@ function showBirthdayModal() {
     showModal('birthdayModal');
 }
 
-// শেষ আপডেট সময় আপডেট
 function updateLastUpdated() {
-    const now = new Date();
     const timeString = now.toLocaleString('bn-BD', {
         year: 'numeric',
         month: 'short',
@@ -640,37 +575,27 @@ function updateLastUpdated() {
         minute: '2-digit'
     });
     elements.lastUpdated.textContent = timeString;
+
 }
 
-// ডেটা রিফ্রেশ
 function refreshData() {
-    elements.refreshBtn.querySelector('i').style.animation = 'spin 1s linear infinite';
+    elements.refreshBtn.querySelector('i').style = 'spin 1s linear infinite';
     loadData().finally(() => {
         elements.refreshBtn.querySelector('i').style.animation = '';
     });
 }
 
-// লোডিং দেখান/লুকান
 function showLoading(show) {
     elements.loadingSpinner.style.display = show ? 'block' : 'none';
     elements.gridContainer.style.display = show ? 'none' : 'grid';
 }
 
-// মডাল দেখান
 function showModal(modalId) {
     elements[modalId].style.display = 'block';
     document.body.style.overflow = 'hidden';
 }
 
-// মডাল লুকান
 function hideModal(modalId) {
     elements[modalId].style.display = 'none';
     document.body.style.overflow = 'auto';
 }
-
-// অটো রিফ্রেশ
-setInterval(() => {
-    if (isAuthenticated) {
-        loadData();
-    }
-}, DATA_CONFIG.refreshInterval);

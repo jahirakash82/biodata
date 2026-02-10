@@ -1,5 +1,5 @@
 const SECURITY_CONFIG = {
-    password: "jahirulislamakash00100",
+    password: "jahirulislamakash",
     maxAttempts: 3,
     blockDuration: 5 * 60 * 1000, // 5 মিনিট
     sessionDuration: 24 * 60 * 60 * 1000 // 24 ঘন্টা
